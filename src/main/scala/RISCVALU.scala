@@ -21,6 +21,7 @@ import scala.annotation.switch
   //  io.carry_out := cout
 //}
 
+// Implementing n bit twos complement block for subtractor
 class TwosComplement(N: Int) extends Module {
   val io = IO(new Bundle {
     val B_in = Input(UInt(N.W))
@@ -32,6 +33,7 @@ class TwosComplement(N: Int) extends Module {
     io.B_out  := B_temp
 }
 
+// Implementing n bit adder block 
 class Adder(N: Int) extends Module {
   val io = IO(new Bundle {
     val A_in = Input(UInt(N.W))
@@ -55,10 +57,10 @@ class PExtALU extends Module {
   val A_32 = io.operand_A
   val B_32 = io.operand_B
 
-  val Aup_16 = io.operand_A(31,16)//.asSInt
-  val Alow_16 = io.operand_A(15,0)//.asSInt
-  val Bup_16 = io.operand_B(31,16)//.asSInt
-  val Blow_16 = io.operand_B(15,0)//.asSInt
+  val Aup_16 = io.operand_A(31,16)
+  val Alow_16 = io.operand_A(15,0)
+  val Bup_16 = io.operand_B(31,16)
+  val Blow_16 = io.operand_B(15,0)
 
   val result_32 = Wire(SInt(32.W))
   val resultup_16 = Wire(SInt(16.W))
@@ -106,10 +108,6 @@ class PExtALU extends Module {
 
       is(AluOP.ADD16) {
 
-        //resultup_16 := Aup_16 + Bup_16
-        //resultlow_16 := Alow_16 + Blow_16
-        //result_32 := Cat(resultup_16,resultlow_16).asSInt
-
         val Addlow = Module(new Adder(16))
         Addlow.io.A_in := Alow_16
         Addlow.io.B_in := Blow_16
@@ -124,10 +122,6 @@ class PExtALU extends Module {
       }
 
       is(AluOP.SUB16) {
-
-       //resultup_16 := (Aup_16 + (~(Bup_16) + 1.U)).asSInt
-       //resultlow_16 := (Alow_16 + (~(Blow_16) + 1.U)).asSInt
-       //result_32 := Cat(resultup_16,resultlow_16).asSInt
 
         val two_16low = Module(new TwosComplement(16))
         two_16low.io.B_in := Blow_16
@@ -150,10 +144,6 @@ class PExtALU extends Module {
 
       is(AluOP.ADSUBC16) {
 
-        //resultup_16 := (Aup_16 + Blow_16).asSInt
-        //resultlow_16 := (Alow_16 + (~(Bup_16) + 1.U)).asSInt
-        //result_32 := Cat(resultup_16,resultlow_16).asSInt
-
         val two_16up = Module(new TwosComplement(16))
         two_16up.io.B_in := Bup_16
 
@@ -171,10 +161,6 @@ class PExtALU extends Module {
       }
 
       is(AluOP.SUBADC16) {
-
-        //resultup_16 := (Aup_16 + (~(Blow_16) + 1.U)).asSInt
-        //resultlow_16 := (Alow_16 + Bup_16).asSInt
-        //result_32 := Cat(resultup_16,resultlow_16).asSInt
 
         val Addlow = Module(new Adder(16))
         Addlow.io.A_in := Alow_16
